@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: catalogue
+  namespace: roboshop
+  labels:
+    project: roboshop
+    component: catalogue
+    tier: backend
+data:
+  MONGO: "true"
+  MONGO_URL: "mongodb://mongodb:27017/catalogue"
+---
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: catalogue
+  namespace: roboshop
+  labels: 
+    project: roboshop
+    component: catalogue
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      project: roboshop
+      component: catalogue
+      tier: backend
+template:
+  metadata:
+    labels:
+      matchLabels:
+      project: roboshop
+      component: catalogue
+      tier: backend
+  spec:
+    container:
+    - name: catalogue
+      image: girishamunnangi/
+      imagePullPolicy: Always
+      resources:
+        requests:
+          memory: "128Mi" 
+          cpu: "100m"
+        limits:
+          memory: "150Mi" 
+          cpu: "120m"
+      readinessProbe:
+        tcpSocket:
+          port: 8080
+        failureThreshold: 2
+        periodSeconds: 10
+        initialDelayseconds: 15
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        failureThreshold: 2
+        periodSeconds: 10
+      envFrom:
+      - configMapRef:
+        name: catalogue
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: catalogue
+  namespace: roboshop
+spec:
+  selector:
+    labels: 
+      project: roboshop
+      component: catalogue
+      tier: backend
+  ports:
+  - protocol: TCP
+    port: 8080
+    taretPort: 8080
+
+
+
+
+
